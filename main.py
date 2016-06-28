@@ -1,3 +1,4 @@
+from __future__ import print_function
 from bs4 import BeautifulSoup
 import urllib
 import urllib2
@@ -8,6 +9,16 @@ import os
 import Queue
 import threading
 import time
+
+congress = int(sys.argv[1])
+
+limit = sys.maxint
+if len(sys.argv) > 2:
+    limit = int(sys.argv[2])    
+
+start = 1
+if len(sys.argv) > 3:
+    start = int(sys.argv[3])
 
 exitFlag = 0
 
@@ -91,7 +102,8 @@ def getSenateBill(threadName, congress, q):
             for tab in tabs[1:]:
                 soup = getSenateBillSoup(congress, bill, tab)
                 savePage(soup.select('#main')[0], getPath(congress, bill, tab))
-            print('c{} b{}'.format(congress, bill))
+            print('{} '.format(bill), end='')
+            sys.stdout.flush()
         else:
             queueLock.release()
 
@@ -105,14 +117,11 @@ class BillCrawler(threading.Thread):
     def run(self):
         getSenateBill(self.name, self.congress, self.q) 
 
-congress = 113
-limit = sys.maxint
-
 startTime = time.time()
 
 listSoup = getBillsListSoup(congress, 25, 1)
 numBills = min(getNumBills(listSoup), limit)
-print('Getting senate bills 1-{} for congress {}'.format(numBills, congress))
+print('Getting senate bills {}-{} for congress {}'.format(start, numBills, congress))
 
 threadList = ['t1', 't2']
 queueLock = threading.Lock()
@@ -122,12 +131,13 @@ threadId = 1
 
 for tName in threadList:
     thread = BillCrawler(threadId, tName, congress, workQueue)
+    thread.daemon = True
     thread.start()
     threads.append(thread)
     threadId += 1
 
 queueLock.acquire()
-for bill in range(1, numBills + 1):
+for bill in range(start, numBills + 1):
     workQueue.put(bill)
 queueLock.release()
 
@@ -140,4 +150,4 @@ for t in threads:
     t.join()
 
 elapsedTime = time.time() - startTime
-print 'Exiting Main Thread ({} bills in {} seconds)'.format(numBills, elapsedTime)
+print('\nExiting Main Thread ({} bills in {} seconds)'.format(numBills, elapsedTime))
