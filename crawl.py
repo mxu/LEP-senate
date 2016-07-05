@@ -112,6 +112,7 @@ class BillCrawler(threading.Thread):
                 self.q.task_done()
             else:
                 qLock.release()
+                break
         logging.debug('stop')
 
 def main(args):
@@ -139,8 +140,7 @@ def main(args):
         t.start()
         threads.append(t)
 
-    while not q.empty():
-        pass 
+    q.join()
     
     exitFlag = True
 
