@@ -3,6 +3,7 @@ import json
 import urllib
 import urllib2
 import re
+import time
 
 import LEP
 
@@ -29,11 +30,15 @@ def count_congress(c):
         'q': json.dumps(q),
     }
     url = 'https://www.congress.gov/search?{}'.format(urllib.urlencode(params))
-    print url
+    print(url)
 
     soup = None
-    while soup is None:
-        soup = LEP.getSoup(url)
+    tries = 0
+    while soup is None and tries < 5:
+        if tries > 0:
+            time.sleep(tries + 1)
+        soup = LEP.get_soup(url)
+        tries = tries + 1
     
     ele = soup.select('.results-number')
     if len(ele) != 1:
