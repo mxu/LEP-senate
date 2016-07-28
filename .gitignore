@@ -1,3 +1,6 @@
 data/
+target/
+
 *.swp
 *.pyc
+*.iml
