@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class SenateDAO {
     private static final String DB_SERVER = "localhost";
@@ -37,6 +38,20 @@ public class SenateDAO {
         return conn;
     }
 
+    public void resetBills() {
+        String deleteSql = "DELETE FROM bills;";
+        String resetSql = "ALTER TABLE bills AUTO_INCREMENT = 1;";
+
+        try(Connection conn = getConnection();
+            Statement delete = conn.createStatement();
+            Statement reset = conn.createStatement()) {
+            delete.executeUpdate(deleteSql);
+            reset.executeUpdate(resetSql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public Congress getOrAddCongress(int congressNum) {
         Congress c = null;
 
@@ -45,7 +60,7 @@ public class SenateDAO {
             PreparedStatement select = createCongressSelect(conn, congressNum)) {
             insert.execute();
             try(ResultSet rs = select.executeQuery()) {
-                if(rs.next()) c = new Congress(rs.getInt(1), rs.getInt(2));
+                if(rs.next()) c = new Congress(rs.getInt(1));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -54,28 +69,33 @@ public class SenateDAO {
         return c;
     }
 
-    private PreparedStatement createCongressInsert(Connection conn, int num) throws SQLException {
-        String sql = "INSERT IGNORE INTO congresses (num) VALUE (?)";
+    private PreparedStatement createCongressInsert(Connection conn, int id) throws SQLException {
+        String sql = "INSERT IGNORE INTO congresses (id) VALUE (?)";
         PreparedStatement ps = conn.prepareStatement(sql);
-        ps.setInt(1, num);
+        ps.setInt(1, id);
         return ps;
     }
 
-    private PreparedStatement createCongressSelect(Connection conn, int num) throws SQLException {
-        String sql = "SELECT * FROM congresses WHERE num=?";
+    private PreparedStatement createCongressSelect(Connection conn, int id) throws SQLException {
+        String sql = "SELECT * FROM congresses WHERE id=?";
         PreparedStatement ps = conn.prepareStatement(sql);
-        ps.setInt(1, num);
+        ps.setInt(1, id);
         return ps;
     }
 
-    /*
-    public Senator getSenator(Congress c, String name) {
+    public Senator getSenator(String[] sponsorInfo) {
         Senator s = null;
 
         try(Connection conn = getConnection();
-            PreparedStatement select = createSenatorSelect(conn, c, name)) {
+            PreparedStatement select = createSenatorSelect(conn, sponsorInfo)) {
             try(ResultSet rs = select.executeQuery()) {
-                if(rs.next()) s = new Senator();
+                if(rs.next()) s = new Senator(
+                        rs.getInt(1),
+                        rs.getString(2),
+                        rs.getString(3),
+                        rs.getString(4),
+                        rs.getString(5),
+                        rs.getString(6));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -84,20 +104,47 @@ public class SenateDAO {
         return s;
     }
 
-    private PreparedStatement createSenatorSelect(Connection conn, Congress c, String name) throws SQLException {
+    private PreparedStatement createSenatorSelect(Connection conn, String[] sponsorInfo) throws SQLException {
         String sql = "SELECT * FROM senators WHERE first_name=? AND last_name=? AND state=?";
         PreparedStatement ps = conn.prepareStatement(sql);
-        // TODO(mike.xu): parse name into first, last, state
-        String first = null;
-        String last = null;
-        String state = null;
-        ps.setString(1, first);
-        ps.setString(2, last);
-        ps.setString(3, state);
-
+        for(int i = 0; i < 3; i++) {
+            ps.setString(i + 1, sponsorInfo[i]);
+        }
         return ps;
     }
-    */
+
+    public Integer createBill(int congressId, int billNum, String title, int importance, int sponsorId, Map<Step, Boolean> stepsMatched) {
+        Integer billId = null;
+
+        try(Connection conn = getConnection();
+            PreparedStatement insert = createBillInsert(conn, congressId, billNum, title, importance, sponsorId, stepsMatched)) {
+            insert.executeUpdate();
+            try(ResultSet rs = insert.getGeneratedKeys()) {
+               if(rs.next()) billId = rs.getInt(1);
+            }
+        } catch(SQLException e) {
+            e.printStackTrace();
+        }
+
+        return billId;
+    }
+
+    private PreparedStatement createBillInsert(Connection conn, int congressId, int billNum, String title,
+                                               int importance, int sponsorId, Map<Step, Boolean> stepsMatched) throws SQLException {
+        String sql = "INSERT INTO bills (congress_id, num, sponsor_id, title, importance, AIC, ABC, BILL, PASS, LAW) VALUES (?,?,?,?,?,?,?,?,?,?)";
+        PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        ps.setInt(1, congressId);
+        ps.setInt(2, billNum);
+        ps.setInt(3, sponsorId);
+        ps.setString(4, title);
+        ps.setInt(5, importance);
+        ps.setInt(6, stepsMatched.get(Step.AIC) ? 1 : 0);
+        ps.setInt(7, stepsMatched.get(Step.ABC) ? 1 : 0);
+        ps.setInt(8, stepsMatched.get(Step.BILL) ? 1 : 0);
+        ps.setInt(9, stepsMatched.get(Step.PASS) ? 1 : 0);
+        ps.setInt(10, stepsMatched.get(Step.LAW) ? 1 : 0);
+        return ps;
+    }
 
     public List<Integer> listCongresses() {
         List<Integer> congresses = new ArrayList<>();
