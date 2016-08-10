@@ -1,3 +1,5 @@
+package org.lep.senate.model;
+
 public class Senator {
     private final int id;
     private final String firstName;
@@ -42,6 +44,6 @@ public class Senator {
 
     @Override
     public String toString() {
-        return String.format("Senator [%d %s %s %s %s %s]", id, firstName, middleName, lastName, suffix, state);
+        return String.format("org.lep.model.Senator [%d %s %s %s %s %s]", id, firstName, middleName, lastName, suffix, state);
     }
 }

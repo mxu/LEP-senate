@@ -1,3 +1,5 @@
+package org.lep.senate.model;
+
 public class Bill {
     private final int id;
     private final int sponsorId;
@@ -74,7 +76,7 @@ public class Bill {
 
     @Override
     public String toString() {
-        return String.format("Bill [id=%d congressId=%d num=%d sponsorId=%d AIC=%d ABC=%d BILL=%d PASS=%d LAW=%d title=%s]\n",
+        return String.format("org.lep.model.Bill [id=%d congressId=%d num=%d sponsorId=%d AIC=%d ABC=%d BILL=%d PASS=%d LAW=%d title=%s]\n",
                 id,
                 congressId,
                 num,

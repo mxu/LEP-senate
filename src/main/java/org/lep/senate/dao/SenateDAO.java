@@ -1,13 +1,15 @@
+package org.lep.senate.dao;
 
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
+import org.lep.senate.model.Congress;
+import org.lep.senate.model.Senator;
+import org.lep.senate.model.Step;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 public class SenateDAO {
@@ -86,16 +88,18 @@ public class SenateDAO {
     public Senator getSenator(String[] sponsorInfo) {
         Senator s = null;
 
-        try(Connection conn = getConnection();
-            PreparedStatement select = createSenatorSelect(conn, sponsorInfo)) {
-            try(ResultSet rs = select.executeQuery()) {
-                if(rs.next()) s = new Senator(
-                        rs.getInt(1),
-                        rs.getString(2),
-                        rs.getString(3),
-                        rs.getString(4),
-                        rs.getString(5),
-                        rs.getString(6));
+        try (Connection conn = getConnection();
+             PreparedStatement select = createSenatorSelect(conn, sponsorInfo)) {
+            try (ResultSet rs = select.executeQuery()) {
+                if (rs.next()) {
+                    s = new Senator(
+                            rs.getInt(1),
+                            rs.getString(2),
+                            rs.getString(3),
+                            rs.getString(4),
+                            rs.getString(5),
+                            rs.getString(6));
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -107,6 +111,12 @@ public class SenateDAO {
     private PreparedStatement createSenatorSelect(Connection conn, String[] sponsorInfo) throws SQLException {
         String sql = "SELECT * FROM senators WHERE first_name=? AND last_name=? AND state=?";
         PreparedStatement ps = conn.prepareStatement(sql);
+
+        // NOTE(mike.xu): temporary hack for Blanche Lincoln/Lambert?
+//        if(sponsorInfo[0].equals("Blanche") && sponsorInfo[1].equals("Lincoln")) {
+//            sponsorInfo[1] = "Lambert";
+//        }
+
         for(int i = 0; i < 3; i++) {
             ps.setString(i + 1, sponsorInfo[i]);
         }
@@ -144,29 +154,5 @@ public class SenateDAO {
         ps.setInt(9, stepsMatched.get(Step.PASS) ? 1 : 0);
         ps.setInt(10, stepsMatched.get(Step.LAW) ? 1 : 0);
         return ps;
-    }
-
-    public List<Integer> listCongresses() {
-        List<Integer> congresses = new ArrayList<>();
-
-        Connection conn = null;
-        Statement st = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            st = conn.createStatement();
-            rs = st.executeQuery("SELECT num FROM congresses");
-            while(rs.next()) {
-                congresses.add(rs.getInt(1));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if(conn != null) { try { conn.close(); } catch (SQLException e) {e.printStackTrace(); } }
-            if(st != null) { try { st.close(); } catch (SQLException e) { e.printStackTrace(); } }
-            if(rs != null) { try { rs.close(); } catch (SQLException e) { e.printStackTrace(); } }
-        }
-
-        return congresses;
     }
 }

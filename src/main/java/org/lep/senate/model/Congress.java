@@ -1,3 +1,5 @@
+package org.lep.senate.model;
+
 public class Congress {
     private final int id;
 
@@ -9,6 +11,6 @@ public class Congress {
 
     @Override
     public String toString() {
-        return String.format("Congress[id=%d]", id);
+        return String.format("org.lep.model.Congress[id=%d]", id);
     }
 }

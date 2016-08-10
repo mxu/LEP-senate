@@ -1,3 +1,5 @@
+package org.lep.senate.model;
+
 public enum Step {
     ABC,
     AIC,
