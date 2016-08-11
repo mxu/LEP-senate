@@ -32,6 +32,7 @@ public class HeaderDocument {
             sponsor = parseSponsor(doc);
         }
 
+        // NOTE(mike.xu): fall back to latest action if actions tab is empty
         latestAction = getLatestAction ? parseLatestAction(doc) : null;
     }
 
