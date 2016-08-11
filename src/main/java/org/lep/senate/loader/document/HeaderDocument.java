@@ -1,6 +1,8 @@
 package org.lep.senate.loader.document;
 
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.lep.senate.biz.MissingActionException;
 
 import java.io.FileNotFoundException;
 import java.util.regex.Matcher;
@@ -15,11 +17,22 @@ public class HeaderDocument {
 
     private final String title;
     private final String[] sponsor;
+    private final String latestAction;
 
-    public HeaderDocument(int congressNum, int billNum) throws FileNotFoundException, ParseFieldException {
+    public HeaderDocument(int congressNum, int billNum, boolean getLatestAction)
+            throws FileNotFoundException, ParseFieldException, MissingActionException {
         Document doc = DocumentLoader.getBillDocument(congressNum, billNum, TYPE);
+
         title = parseTitle(doc);
-        sponsor = parseSponsor(doc);
+
+        // NOTE(mike.xu): temporary fix for incorrect data from congress.gov
+        if(congressNum == 108 && billNum == 1501) {
+            sponsor = new String[] {"John", "McCain", "AZ"};
+        } else {
+            sponsor = parseSponsor(doc);
+        }
+
+        latestAction = getLatestAction ? parseLatestAction(doc) : null;
     }
 
     private static String parseTitle(Document doc) throws ParseFieldException {
@@ -51,7 +64,19 @@ public class HeaderDocument {
         return new String[]{first, last, state};
     }
 
+    private static String parseLatestAction(Document doc) throws MissingActionException {
+        Element e = doc.select("tr:nth-child(2) td").get(0);
+        String latestAction = e.text();
+        if(latestAction != null && !latestAction.equals("")) {
+            return latestAction;
+        } else {
+            throw new MissingActionException("Could not find latest action in header");
+        }
+    }
+
     public String getTitle() { return title; }
 
     public String[] getSponsor() { return sponsor; }
+
+    public String getLatestAction() { return latestAction; }
 }

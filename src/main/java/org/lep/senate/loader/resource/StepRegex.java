@@ -50,7 +50,7 @@ public class StepRegex {
 
             stepRegexMap.put(step,
                     lines.stream()
-                            .map(line -> Pattern.compile(line.length() > 6 ? line.substring(1, line.length() - 3) : ""))
+                            .map(line -> Pattern.compile(line.length() > 6 ? line.substring(1, line.length() - 2) : ""))
                             .collect(Collectors.toList()));
         }
 

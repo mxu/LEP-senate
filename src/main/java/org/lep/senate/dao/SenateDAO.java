@@ -4,6 +4,8 @@ import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 import org.lep.senate.model.Congress;
 import org.lep.senate.model.Senator;
 import org.lep.senate.model.Step;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,6 +15,8 @@ import java.sql.Statement;
 import java.util.Map;
 
 public class SenateDAO {
+    private static final Logger logger = LoggerFactory.getLogger(SenateDAO.class);
+
     private static final String DB_SERVER = "localhost";
     private static final int DB_PORT = 3306;
     private static final String DB_NAME = "lep-senate";
@@ -112,10 +116,10 @@ public class SenateDAO {
         String sql = "SELECT * FROM senators WHERE first_name=? AND last_name=? AND state=?";
         PreparedStatement ps = conn.prepareStatement(sql);
 
-        // NOTE(mike.xu): temporary hack for Blanche Lincoln/Lambert?
-//        if(sponsorInfo[0].equals("Blanche") && sponsorInfo[1].equals("Lincoln")) {
-//            sponsorInfo[1] = "Lambert";
-//        }
+        // NOTE(mike.xu): temporary hack for Blanche Lincoln/Lambert
+        if(sponsorInfo[0].equals("Blanche") && sponsorInfo[1].equals("Lincoln")) {
+            sponsorInfo[1] = "Lambert";
+        }
 
         for(int i = 0; i < 3; i++) {
             ps.setString(i + 1, sponsorInfo[i]);

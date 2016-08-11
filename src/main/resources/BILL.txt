@@ -1,1 +1,1 @@
-/Introduced in Senate/g/Introduced in the Senate/g/Read the second time and referred to Senate Committee on .*/g/Read twice and referred jointly to the Committees on .*/g/Read twice and referred to the Committee on .*/g
+/Introduced in Senate/g/Introduced in the Senate/g/Read the second time and referred to Senate Committee on .*/g/Read twice and referred jointly to the Committees on .*/g/Read twice and referred to the Committee on .*/g/Referred to \w+ Committee on .*/g

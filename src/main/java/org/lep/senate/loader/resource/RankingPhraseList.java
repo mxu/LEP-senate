@@ -71,10 +71,11 @@ public class RankingPhraseList {
                 .collect(Collectors.toList());
 
         for(List<String> row : phrases) {
+            String phrase = row.get(1).replace("\"", "");
             if(row.get(2).equals("0")) {
-                rankingPhrases.add(row.get(1));
+                rankingPhrases.add(phrase);
             } else {
-                derankingPhrases.add(row.get(1));
+                derankingPhrases.add(phrase);
             }
         }
     }
