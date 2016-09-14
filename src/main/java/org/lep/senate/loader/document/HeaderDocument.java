@@ -13,7 +13,7 @@ public class HeaderDocument {
     private static final Pattern TITLE_PATTERN =
             Pattern.compile("S.\\d+ - (.*) \\d+\\w+ Congress \\(\\d+-\\d+\\)");
     private static final Pattern SPONSOR_PATTERN =
-            Pattern.compile("Sen. ([^,]+), ([\\w.]+)( [\\w.]+)?(,? \\w+.)?( \\(\\w+\\))? \\[(\\w)-(\\w\\w)\\]");
+            Pattern.compile("Sen. ([^,]+), ([\\w.]+)( [\\w.]+)?(,? \\w+.)?( \\(\\w+\\))? \\[(\\w+)-(\\w+)\\]");
 
     private final String title;
     private final String[] sponsor;
