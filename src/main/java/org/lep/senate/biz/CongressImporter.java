@@ -1,6 +1,7 @@
 package org.lep.senate.biz;
 
 import com.beust.jcommander.JCommander;
+import com.sun.tools.javac.util.Pair;
 import org.lep.senate.dao.SenateDAO;
 import org.lep.senate.loader.document.ActionsDocument;
 import org.lep.senate.loader.document.DocumentLoader;
@@ -17,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,6 +30,10 @@ public class CongressImporter {
     private static final Logger logger = LoggerFactory.getLogger(CongressImporter.class);
 
     private static final SenateDAO dao = new SenateDAO();
+
+    private static final List<Pair<Integer, Integer>> BACKFILL_COUNTER = new ArrayList<>();
+    private static final List<Pair<Integer, Integer>> LAW_COUNTER = new ArrayList<>();
+    private static final List<Pair<Integer, Integer>> PASS_NOT_LAW_COUNTER = new ArrayList<>();
 
     public static void main(String[] args) {
         CongressSettings settings = new CongressSettings();
@@ -50,6 +56,17 @@ public class CongressImporter {
                     e.printStackTrace();
                 }
             }
+        }
+
+        logCounter("Backfill PASS -> ABC", BACKFILL_COUNTER);
+        logCounter("Matched LAW", LAW_COUNTER);
+        logCounter("Matched PASS but not LAW", PASS_NOT_LAW_COUNTER);
+    }
+
+    private static void logCounter(String name, List<Pair<Integer, Integer>> bills) {
+        logger.info("{}: {} bills", name, bills.size());
+        for(Pair<Integer, Integer> bill : bills) {
+            logger.info("{} ({})", bill.snd, bill.fst);
         }
     }
 
@@ -146,16 +163,36 @@ public class CongressImporter {
             logger.warn("Missing actions for bill {} ({}), falling back to latest action from header", billNum, congressNum);
         }
 
+        // NOTE(mike.xu): automatically set BILL step for now
+        stepsMatched.put(Step.BILL, true);
+
         for(String action : actions) {
             for(Step step : stepsMatched.keySet()) {
                 if(!stepsMatched.get(step)) {
-                    stepsMatched.put(step, StepRegex.matchesStepRegex(step, action));
+                    boolean matches = StepRegex.matchesStepRegex(step, action);
+                    // NOTE(mike.xu): if bill achieves PASS, automatically set ABC as well
+                    if(matches) {
+                        stepsMatched.put(step, true);
+                        if(step == Step.PASS && stepsMatched.get(Step.ABC)) {
+                            stepsMatched.put(Step.ABC, true);
+                            logger.debug("backfill PASS -> ABC {} ({})", billNum, congressNum);
+                            BACKFILL_COUNTER.add(new Pair<>(congressNum, billNum));
+                        }
+                    }
                 }
             }
         }
 
+        if(stepsMatched.get(Step.LAW)) {
+            logger.debug("match LAW {} ({})", billNum, congressNum);
+            LAW_COUNTER.add(new Pair<>(congressNum, billNum));
+        } else if(stepsMatched.get(Step.PASS)) {
+            logger.debug("match PASS but not LAW {} ({})", billNum, congressNum);
+            PASS_NOT_LAW_COUNTER.add(new Pair<>(congressNum, billNum));
+        }
+
         if(!stepsMatched.get(Step.BILL)) {
-            logger.debug("blah");
+            logger.warn("{} ({}) did not match BILL", billNum, congressNum);
         }
 
         dao.createBill(congressNum, billNum, title, importance, s.getId(), stepsMatched);
