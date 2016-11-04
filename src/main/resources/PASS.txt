@@ -20,3 +20,4 @@
 /Passed Senate without amendment by Voice Vote/g
 /Passed Senate without amendment by Yea-Nay Vote./g
 /Passed Senate, under the order of .*, having achieved 60 votes in the affirmative, with an amendment by Yea-Nay Vote/g
+/Passed Senate/g

@@ -158,3 +158,5 @@
 /Third cloture motion on the bill presented in Senate/g
 /Third cloture motion not he motion to proceed to consideration presented in Senate/g
 /With written report No./g
+/Indefinitely postponed by Senate by Voice Vote/g
+/Indefinitely postponed by Senate by Unanimous Consent/g

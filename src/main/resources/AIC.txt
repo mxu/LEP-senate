@@ -38,3 +38,4 @@
 /Subcommittee on .* discharged/g
 /With printed hearing/g
 /Senate Committee on .* discharged by Unanimous Consent/g
+/Ordered favorably reported an original bill \(S. .*\) in lieu of this measure/g
