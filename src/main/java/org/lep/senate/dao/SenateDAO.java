@@ -12,6 +12,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class SenateDAO {
@@ -158,5 +160,102 @@ public class SenateDAO {
         ps.setInt(9, stepsMatched.get(Step.PASS) ? 1 : 0);
         ps.setInt(10, stepsMatched.get(Step.LAW) ? 1 : 0);
         return ps;
+    }
+
+    public List<Integer> getCongresses() {
+        String selectSql = "SELECT id FROM congresses ORDER BY id";
+        List<Integer> congressIds = new ArrayList<>();
+
+        try(Connection conn = getConnection();
+            Statement select = conn.createStatement()) {
+            try (ResultSet rs = select.executeQuery(selectSql)) {
+                while(rs.next()) {
+                    congressIds.add(rs.getInt(1));
+                }
+            }
+        } catch(SQLException e) {
+            e.printStackTrace();
+        }
+
+        return congressIds;
+    }
+
+    private PreparedStatement createSenatorsSelect(Connection conn, int congressId) throws SQLException {
+        String sql = "SELECT senator_id FROM congresses_senators WHERE congress_id=?";
+        PreparedStatement ps = conn.prepareStatement(sql);
+
+        ps.setInt(1, congressId);
+        return ps;
+    }
+
+    public List<Integer> getSenatorIds(int congressId) {
+        List<Integer> senatorIds = new ArrayList<>();
+
+        try(Connection conn = getConnection();
+            PreparedStatement select = createSenatorsSelect(conn, congressId)) {
+            try(ResultSet rs = select.executeQuery()) {
+                while(rs.next()) {
+                    senatorIds.add(rs.getInt(1));
+                }
+            }
+        } catch(SQLException e) {
+            e.printStackTrace();
+        }
+
+        return senatorIds;
+    }
+
+    private PreparedStatement getBillSelect(Connection conn, int congressId, int senatorId, int importance, Step step) throws SQLException {
+        String sql = "SELECT count(*) FROM bills WHERE congress_id=? AND sponsor_id=? AND importance=? AND " + step.name() + "=1";
+        PreparedStatement ps = conn.prepareStatement(sql);
+
+        ps.setInt(1, congressId);
+        ps.setInt(2, senatorId);
+        ps.setInt(3, importance);
+        return ps;
+    }
+
+    public int getBillCount(int congressId, int senatorId, int importance, Step step) {
+        int count = 0;
+
+        try(Connection conn = getConnection();
+            PreparedStatement select = getBillSelect(conn, congressId, senatorId, importance, step)) {
+            try(ResultSet rs = select.executeQuery()) {
+                if(rs.next()) {
+                    count = rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return count;
+    }
+
+    private PreparedStatement getSenatorSelect(Connection conn, int senatorId) throws SQLException {
+        String sql = "SELECT first_name, last_name FROM senators WHERE id=?";
+        PreparedStatement ps = conn.prepareStatement(sql);
+
+        ps.setInt(1, senatorId);
+        return ps;
+    }
+
+    public String getSenatorName(int senatorId) {
+        StringBuilder sb = new StringBuilder();
+
+        try(Connection conn = getConnection();
+            PreparedStatement select = getSenatorSelect(conn, senatorId)) {
+            try(ResultSet rs = select.executeQuery()) {
+                if(rs.next()) {
+                    sb.append(rs.getString(1));
+                    sb.append(" ");
+                    sb.append(rs.getString(2));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return sb.toString();
     }
 }
