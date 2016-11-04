@@ -63,6 +63,12 @@ public class CongressImporter {
         logCounter("Matched PASS but not LAW", PASS_NOT_LAW_COUNTER);
     }
 
+    // for each senator, filter bills of that congress by importance and tally total counts of each bin
+    public static void generateRepsReport(int congressNum, int importance) {
+        // get senator ids for the congress
+        //
+    }
+
     private static void logCounter(String name, List<Pair<Integer, Integer>> bills) {
         logger.info("{}: {} bills", name, bills.size());
         for(Pair<Integer, Integer> bill : bills) {
@@ -173,7 +179,7 @@ public class CongressImporter {
                     // NOTE(mike.xu): if bill achieves PASS, automatically set ABC as well
                     if(matches) {
                         stepsMatched.put(step, true);
-                        if(step == Step.PASS && stepsMatched.get(Step.ABC)) {
+                        if(step == Step.PASS && !stepsMatched.get(Step.ABC)) {
                             stepsMatched.put(Step.ABC, true);
                             logger.debug("backfill PASS -> ABC {} ({})", billNum, congressNum);
                             BACKFILL_COUNTER.add(new Pair<>(congressNum, billNum));
