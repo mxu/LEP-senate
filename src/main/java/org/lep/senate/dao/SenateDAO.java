@@ -129,6 +129,37 @@ public class SenateDAO {
         return ps;
     }
 
+    private PreparedStatement createSenatorSelect(Connection conn, int senatorId) throws SQLException {
+        String sql = "SELECT * FROM senators WHERE id=?";
+        PreparedStatement ps = conn.prepareStatement(sql);
+
+        ps.setInt(1, senatorId);
+        return ps;
+    }
+
+    public Senator getSenator(int senatorId) {
+        Senator s = null;
+
+        try (Connection conn = getConnection();
+             PreparedStatement select = createSenatorSelect(conn, senatorId)) {
+            try (ResultSet rs = select.executeQuery()) {
+                if (rs.next()) {
+                    s = new Senator(
+                            rs.getInt(1),
+                            rs.getString(2),
+                            rs.getString(3),
+                            rs.getString(4),
+                            rs.getString(5),
+                            rs.getString(6));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return s;
+    }
+
     public Integer createBill(int congressId, int billNum, String title, int importance, int sponsorId, Map<Step, Boolean> stepsMatched) {
         Integer billId = null;
 
