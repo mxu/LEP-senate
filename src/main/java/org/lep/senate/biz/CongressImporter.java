@@ -34,6 +34,7 @@ public class CongressImporter {
     private static final List<Pair<Integer, Integer>> BACKFILL_COUNTER = new ArrayList<>();
     private static final List<Pair<Integer, Integer>> LAW_COUNTER = new ArrayList<>();
     private static final List<Pair<Integer, Integer>> PASS_NOT_LAW_COUNTER = new ArrayList<>();
+    private static final List<Pair<Integer, Integer>> AMENDED_COUNTER = new ArrayList<>();
 
     public static void main(String[] args) {
         CongressSettings settings = new CongressSettings();
@@ -61,12 +62,7 @@ public class CongressImporter {
         logCounter("Backfill PASS -> ABC", BACKFILL_COUNTER);
         logCounter("Matched LAW", LAW_COUNTER);
         logCounter("Matched PASS but not LAW", PASS_NOT_LAW_COUNTER);
-    }
-
-    // for each senator, filter bills of that congress by importance and tally total counts of each bin
-    public static void generateRepsReport(int congressNum, int importance) {
-        // get senator ids for the congress
-        //
+        logCounter("Amended", AMENDED_COUNTER);
     }
 
     private static void logCounter(String name, List<Pair<Integer, Integer>> bills) {
@@ -143,6 +139,7 @@ public class CongressImporter {
     private static void processBill(int congressNum, int billNum)
             throws FileNotFoundException, ParseFieldException, MissingSenatorException, MissingActionException {
         Map<Step, Boolean> stepsMatched = createStepsMap();
+        boolean amended = false;
         List<String> actions = null;
         boolean getLatestAction = false;
         try {
@@ -187,6 +184,11 @@ public class CongressImporter {
                     }
                 }
             }
+
+            amended = StepRegex.matchesAmendedRegex(action);
+            if(amended) {
+                AMENDED_COUNTER.add(new Pair<>(congressNum, billNum));
+            }
         }
 
         if(stepsMatched.get(Step.LAW)) {
@@ -201,7 +203,7 @@ public class CongressImporter {
             logger.warn("{} ({}) did not match BILL", billNum, congressNum);
         }
 
-        dao.createBill(congressNum, billNum, title, importance, s.getId(), stepsMatched);
+        dao.createBill(congressNum, billNum, title, importance, s.getId(), stepsMatched, amended);
     }
 
     private static int getImportance(int congressNum, int billNum, String title) throws FileNotFoundException {

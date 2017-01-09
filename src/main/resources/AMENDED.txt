@@ -1,0 +1,42 @@
+/S.Amdt.\d+ Amendment SA \d+ ruled non-germane by the chair/g
+/S.Amdt.\d+ Amendment agreed to in Senate by Voice Vote/g
+/S.Amdt.\d+ Amendment agreed to in Senate by Yea-Nay Vote/g
+/S.Amdt.\d+ Amendment not agreed to in Senate by Yea-Nay Vote/g
+/S.Amdt.\d+ Amendment SA \d+ agreed to in Senate by Unanimous Consent/g
+/S.Amdt.\d+ Amendment SA \d+ agreed to in Senate by Voice Vote/g
+/S.Amdt.\d+ Amendment SA \d+ agreed to in Senate by Yea-Nay Vote/g
+/S.Amdt.\d+ Amendment SA \d+ as modified agreed to in Senate by Unanimous Consent/g
+/S.Amdt.\d+ Amendment SA \d+ as modified agreed to in Senate by Voice Vote/g
+/S.Amdt.\d+ Amendment SA \d+ not agreed to in Senate by Yea-Nay Vote/g
+/S.Amdt.\d+ Amendment SA \d+ proposed by Senator .* for Senator .*/g
+/S.Amdt.\d+ Amendment SA \d+ ruled out of order by the chair/g
+/S.Amdt.\d+ Amendment SP \d+ (as amended) agreed to in Senate by Voice Vote/g
+/S.Amdt.\d+ Amendment SP \d+ agreed to in Senate by Voice Vote/g
+/S.Amdt.\d+ Amendment SP \d+ agreed to in Senate by Yea-Nay Vote/g
+/S.Amdt.\d+ Amendment SP \d+ not agreed to in Senate by Yea-Nay Vote/g
+/S.Amdt.\d+ Motion to table agreed to in Senate by Yea-Nay Vote/g
+/S.Amdt.\d+ Motion to table amendment SA \d+ agreed to in Senate by Yea-Nay Vote/g
+/S.Amdt.\d+ Motion to table rejected in Senate by Yea-Nay Vote/g
+/S.Amdt.\d+ Motion to table SP \d+ agreed to in Senate by Yea-Nay Vote/g
+/S.Amdt.\d+ Motion to table SP \d+ rejected in Senate by Yea-Nay Vote/g
+/S.Amdt.\d+ Motion to table the motion to reconsider the vote by which SP \d+ was tabled agreed to in Senate by Yea-Nay Vote/g
+/S.Amdt.\d+ Motion to table the point of order agreed to in Senate by Yea-Nay Vote/g
+/S.Amdt.\d+ Point of order raised in Senate with respect to amendment/g
+/S.Amdt.\d+ Proposed amendment SA \d+ withdrawn in Senate/g
+/S.Amdt.\d+ Proposed amendment SP \d+ withdrawn in Senate/g
+/S.Amdt.\d+ Proposed amendment SP \d+ withdrawn in Senate/g
+/S.Amdt.\d+ Proposed amendment withdrawn in Senate/g
+/S.Amdt.\d+ Proposed by Senator .* for Senator .*/g
+/S.Amdt.\d+ SA \d+ fell when SA \d+ fell/g
+/S.Amdt.\d+ SA \d+ fell when SA \d+ withdrawn/g
+/S.Amdt.\d+ SP \d+ agreed to in Senate by Yea-Nay Vote/g
+/S.Amdt.\d+ SP \d+ fell when SP \d+ tabled/g
+/S.Amdt.\d+ SP \d+ not agreed to in Senate by Voice Vote/g
+/S.Amdt.\d+ SP \d+ ruled out of order by the chair/g
+/S.Amdt..* Amendment SA .* proposed by Senator .*/g
+/S.Amdt..* Proposed by Senator .*/g
+/S.UP.Amdt.\d+ Amendment agreed to in Senate by Voice Vote/g
+/S.UP.Amdt.\d+ Amendment SU \d+ agreed to in Senate by Voice Vote/g
+/S.UP.Amdt.\d+ Ordered to be printed. SP \d+/g
+/S.UP.Amdt.\d+ Proposed by Senator .*/g
+/S.UP.Amdt.\d+ Proposed by Senator .* for Senator .*/g

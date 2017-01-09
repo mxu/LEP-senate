@@ -160,11 +160,13 @@ public class SenateDAO {
         return s;
     }
 
-    public Integer createBill(int congressId, int billNum, String title, int importance, int sponsorId, Map<Step, Boolean> stepsMatched) {
+    public Integer createBill(int congressId, int billNum, String title, int importance,
+                              int sponsorId, Map<Step, Boolean> stepsMatched, boolean amended) {
         Integer billId = null;
 
         try(Connection conn = getConnection();
-            PreparedStatement insert = createBillInsert(conn, congressId, billNum, title, importance, sponsorId, stepsMatched)) {
+            PreparedStatement insert = createBillInsert(conn, congressId, billNum, title, importance, sponsorId,
+                    stepsMatched, amended)) {
             insert.executeUpdate();
             try(ResultSet rs = insert.getGeneratedKeys()) {
                if(rs.next()) billId = rs.getInt(1);
@@ -177,8 +179,10 @@ public class SenateDAO {
     }
 
     private PreparedStatement createBillInsert(Connection conn, int congressId, int billNum, String title,
-                                               int importance, int sponsorId, Map<Step, Boolean> stepsMatched) throws SQLException {
-        String sql = "INSERT INTO bills (congress_id, num, sponsor_id, title, importance, AIC, ABC, BILL, PASS, LAW) VALUES (?,?,?,?,?,?,?,?,?,?)";
+                                               int importance, int sponsorId, Map<Step, Boolean> stepsMatched,
+                                               boolean amended) throws SQLException {
+        String sql = "INSERT INTO bills (congress_id, num, sponsor_id, title, importance, AIC, ABC, BILL, PASS, LAW," +
+                " amended) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
         PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         ps.setInt(1, congressId);
         ps.setInt(2, billNum);
@@ -190,6 +194,7 @@ public class SenateDAO {
         ps.setInt(8, stepsMatched.get(Step.BILL) ? 1 : 0);
         ps.setInt(9, stepsMatched.get(Step.PASS) ? 1 : 0);
         ps.setInt(10, stepsMatched.get(Step.LAW) ? 1 : 0);
+        ps.setInt(11, amended ? 1 : 0);
         return ps;
     }
 
@@ -236,8 +241,10 @@ public class SenateDAO {
         return senatorIds;
     }
 
-    private PreparedStatement getBillSelect(Connection conn, int congressId, int senatorId, int importance, Step step) throws SQLException {
-        String sql = "SELECT count(*) FROM bills WHERE congress_id=? AND sponsor_id=? AND importance=? AND " + step.name() + "=1";
+    private PreparedStatement getBillSelect(Connection conn, int congressId, int senatorId, int importance,
+                                            Step step) throws SQLException {
+        String sql = "SELECT count(*) FROM bills WHERE congress_id=? AND sponsor_id=? AND importance=? AND " +
+                step.name() + "=1";
         PreparedStatement ps = conn.prepareStatement(sql);
 
         ps.setInt(1, congressId);

@@ -11,6 +11,7 @@ public class Bill {
     private final int BILL;
     private final int PASS;
     private final int LAW;
+    private final int amended;
 
     public Bill(int id,
                 int sponsorId,
@@ -21,7 +22,8 @@ public class Bill {
                 int ABC,
                 int BILL,
                 int PASS,
-                int LAW) {
+                int LAW,
+                int amended) {
         this.id = id;
         this.sponsorId = sponsorId;
         this.congressId = congressId;
@@ -32,6 +34,7 @@ public class Bill {
         this.BILL = BILL;
         this.PASS = PASS;
         this.LAW = LAW;
+        this.amended = amended;
     }
 
     public int getId() {
@@ -74,9 +77,13 @@ public class Bill {
         return LAW;
     }
 
+    public int getAmended() {
+        return amended;
+    }
+
     @Override
     public String toString() {
-        return String.format("org.lep.model.Bill [id=%d congressId=%d num=%d sponsorId=%d AIC=%d ABC=%d BILL=%d PASS=%d LAW=%d title=%s]\n",
+        return String.format("org.lep.model.Bill [id=%d congressId=%d num=%d sponsorId=%d AIC=%d ABC=%d BILL=%d PASS=%d LAW=%d amended=%d title=%s]\n",
                 id,
                 congressId,
                 num,
@@ -86,6 +93,7 @@ public class Bill {
                 BILL,
                 PASS,
                 LAW,
+                amended,
                 title);
     }
 
