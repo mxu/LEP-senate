@@ -60,6 +60,20 @@ public class SenateDAO {
         }
     }
 
+    public void resetAmdtSponsors() {
+        String deleteSql = "DELETE FROM amendment_sponsors;";
+        String resetSql = "ALTER TABLE amendment_sponsors AUTO_INCREMENT = 1;";
+
+        try(Connection conn = getConnection();
+            Statement delete = conn.createStatement();
+            Statement reset = conn.createStatement()) {
+            delete.executeUpdate(deleteSql);
+            reset.executeUpdate(resetSql);
+        } catch(SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public Congress getOrAddCongress(int congressNum) {
         Congress c = null;
 
@@ -95,17 +109,16 @@ public class SenateDAO {
         Senator s = null;
 
         try (Connection conn = getConnection();
-             PreparedStatement select = createSenatorSelect(conn, sponsorInfo)) {
-            try (ResultSet rs = select.executeQuery()) {
-                if (rs.next()) {
-                    s = new Senator(
-                            rs.getInt(1),
-                            rs.getString(2),
-                            rs.getString(3),
-                            rs.getString(4),
-                            rs.getString(5),
-                            rs.getString(6));
-                }
+             PreparedStatement select = createSenatorSelect(conn, sponsorInfo);
+             ResultSet rs = select.executeQuery()) {
+            if (rs.next()) {
+                s = new Senator(
+                        rs.getInt(1),
+                        rs.getString(2),
+                        rs.getString(3),
+                        rs.getString(4),
+                        rs.getString(5),
+                        rs.getString(6));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -141,17 +154,16 @@ public class SenateDAO {
         Senator s = null;
 
         try (Connection conn = getConnection();
-             PreparedStatement select = createSenatorSelect(conn, senatorId)) {
-            try (ResultSet rs = select.executeQuery()) {
-                if (rs.next()) {
-                    s = new Senator(
-                            rs.getInt(1),
-                            rs.getString(2),
-                            rs.getString(3),
-                            rs.getString(4),
-                            rs.getString(5),
-                            rs.getString(6));
-                }
+             PreparedStatement select = createSenatorSelect(conn, senatorId);
+             ResultSet rs = select.executeQuery()) {
+            if (rs.next()) {
+                s = new Senator(
+                        rs.getInt(1),
+                        rs.getString(2),
+                        rs.getString(3),
+                        rs.getString(4),
+                        rs.getString(5),
+                        rs.getString(6));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -160,13 +172,66 @@ public class SenateDAO {
         return s;
     }
 
+    private PreparedStatement createAmdtSponsorSelect(Connection conn, int congressId, String amdtNum) throws SQLException {
+        String sql = "SELECT sponsor_id FROM amendment_sponsors WHERE congress_id=? AND amendment_num=?";
+        PreparedStatement ps = conn.prepareStatement(sql);
+
+        ps.setInt(1, congressId);
+        ps.setString(2, amdtNum);
+        return ps;
+    }
+
+    public Integer getAmdtSponsor(int congressId, String amdtNum) {
+        Integer amdtSponsorId = null;
+
+        try(Connection conn = getConnection();
+            PreparedStatement select = createAmdtSponsorSelect(conn, congressId, amdtNum);
+            ResultSet rs = select.executeQuery()) {
+            if(rs.next()) {
+                amdtSponsorId = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return amdtSponsorId;
+    }
+
+    public Integer createAmdtSponsor(int congressId, String amdtNum, int sponsorId, int billNum) {
+        Integer amdtSponsorId = null;
+
+        try(Connection conn = getConnection();
+            PreparedStatement insert = createAmdtSponsorInsert(conn, congressId, amdtNum, sponsorId, billNum)) {
+            insert.executeUpdate();
+            try(ResultSet rs = insert.getGeneratedKeys()) {
+                if(rs.next()) amdtSponsorId = rs.getInt(1);
+            }
+        } catch(SQLException e) {
+            e.printStackTrace();
+        }
+
+        return amdtSponsorId;
+    }
+
+    private PreparedStatement createAmdtSponsorInsert(Connection conn, int congressId, String amdtNum, int sponsorId,
+                                                      int billNum) throws SQLException {
+        String sql = "INSERT INTO amendment_sponsors (congress_id, amendment_num, sponsor_id, bill_num) " +
+                "VALUES (?,?,?,?)";
+        PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        ps.setInt(1, congressId);
+        ps.setString(2, amdtNum);
+        ps.setInt(3, sponsorId);
+        ps.setInt(4, billNum);
+        return ps;
+    }
+
     public Integer createBill(int congressId, int billNum, String title, int importance,
-                              int sponsorId, Map<Step, Boolean> stepsMatched, boolean amended) {
+                              int sponsorId, Map<Step, Boolean> stepsMatched, int amenders) {
         Integer billId = null;
 
         try(Connection conn = getConnection();
             PreparedStatement insert = createBillInsert(conn, congressId, billNum, title, importance, sponsorId,
-                    stepsMatched, amended)) {
+                    stepsMatched, amenders)) {
             insert.executeUpdate();
             try(ResultSet rs = insert.getGeneratedKeys()) {
                if(rs.next()) billId = rs.getInt(1);
@@ -180,9 +245,9 @@ public class SenateDAO {
 
     private PreparedStatement createBillInsert(Connection conn, int congressId, int billNum, String title,
                                                int importance, int sponsorId, Map<Step, Boolean> stepsMatched,
-                                               boolean amended) throws SQLException {
+                                               int amenders) throws SQLException {
         String sql = "INSERT INTO bills (congress_id, num, sponsor_id, title, importance, AIC, ABC, BILL, PASS, LAW," +
-                " amended) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+                " amenders) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
         PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         ps.setInt(1, congressId);
         ps.setInt(2, billNum);
@@ -194,7 +259,7 @@ public class SenateDAO {
         ps.setInt(8, stepsMatched.get(Step.BILL) ? 1 : 0);
         ps.setInt(9, stepsMatched.get(Step.PASS) ? 1 : 0);
         ps.setInt(10, stepsMatched.get(Step.LAW) ? 1 : 0);
-        ps.setInt(11, amended ? 1 : 0);
+        ps.setInt(11, amenders);
         return ps;
     }
 

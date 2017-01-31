@@ -4,6 +4,7 @@ import com.beust.jcommander.JCommander;
 import com.sun.tools.javac.util.Pair;
 import org.lep.senate.dao.SenateDAO;
 import org.lep.senate.loader.document.ActionsDocument;
+import org.lep.senate.loader.document.AmendmentIndexDocument;
 import org.lep.senate.loader.document.DocumentLoader;
 import org.lep.senate.loader.document.HeaderDocument;
 import org.lep.senate.loader.document.ParseFieldException;
@@ -22,8 +23,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class CongressImporter {
@@ -139,7 +142,6 @@ public class CongressImporter {
     private static void processBill(int congressNum, int billNum)
             throws FileNotFoundException, ParseFieldException, MissingSenatorException, MissingActionException {
         Map<Step, Boolean> stepsMatched = createStepsMap();
-        boolean amended = false;
         List<String> actions = null;
         boolean getLatestAction = false;
         try {
@@ -169,6 +171,7 @@ public class CongressImporter {
         // NOTE(mike.xu): automatically set BILL step for now
         stepsMatched.put(Step.BILL, true);
 
+        Set<Integer> amdtSponsorIds = new HashSet<>();
         for(String action : actions) {
             for(Step step : stepsMatched.keySet()) {
                 if(!stepsMatched.get(step)) {
@@ -185,11 +188,16 @@ public class CongressImporter {
                 }
             }
 
-            amended = StepRegex.matchesAmendedRegex(action);
+            boolean amended = StepRegex.matchesAmendedRegex(action);
+
             if(amended) {
                 AMENDED_COUNTER.add(new Pair<>(congressNum, billNum));
+                String amdtNum = AmendmentIndexDocument.getAmdtNum(action);
+                Integer amdtSponsorId = dao.getAmdtSponsor(congressNum, amdtNum);
+                amdtSponsorIds.add(amdtSponsorId);
             }
         }
+        int amenders = amdtSponsorIds.size();
 
         if(stepsMatched.get(Step.LAW)) {
             logger.debug("match LAW {} ({})", billNum, congressNum);
@@ -203,7 +211,7 @@ public class CongressImporter {
             logger.warn("{} ({}) did not match BILL", billNum, congressNum);
         }
 
-        dao.createBill(congressNum, billNum, title, importance, s.getId(), stepsMatched, amended);
+        dao.createBill(congressNum, billNum, title, importance, s.getId(), stepsMatched, amenders);
     }
 
     private static int getImportance(int congressNum, int billNum, String title) throws FileNotFoundException {
