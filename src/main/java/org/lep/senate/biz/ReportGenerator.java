@@ -139,7 +139,7 @@ public class ReportGenerator {
     }
 
     private static PreparedStatement createAmendersSelect(Connection conn, int congressId, int billNum) throws SQLException {
-        String sql = "SELECT DISTINCT(sponsor_id) FROM amendment_sponsors WHERE congress_id=? AND bill_num=?";
+        String sql = "SELECT DISTINCT(sponsor_id) FROM amendment_sponsors WHERE congress_id=? AND bill_num=? AND successful=1";
         PreparedStatement ps = conn.prepareStatement(sql);
         ps.setInt(1, congressId);
         ps.setInt(2, billNum);
@@ -174,7 +174,7 @@ public class ReportGenerator {
                                 ReportRow amenderRow = report.get(amenderId);
                                 if(amenderRow == null) {
                                     amenderRow = new ReportRow();
-                                    report.put(amenderId, row);
+                                    report.put(amenderId, amenderRow);
                                 }
                                 amenderRows.add(amenderRow);
                             }

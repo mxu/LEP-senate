@@ -1,23 +1,23 @@
-/Amendment SA .* agreed to in Senate by Unanimous Consent/g
-/Amendment SA .* agreed to in Senate by Voice Vote/g
-/Amendment SA .* agreed to in Senate by Yea-Nay Vote./g
-/Amendment SA .* as modified agreed to in Senate by Voice Vote/g
-/Amendment SA .* as modified agreed to in Senate by Yea-Nay Vote/g
-/Amendment SA .* under the order of .*, having achieved 60 votes in the affirmative, was agreed to in Senate by Yea-Nay Vote./g
-/Amendment SA .*, pursuant to the order of .*, having achieved the required 60 votes in the affirmative, was agreed to in Senate by Yea-Nay./g
-/Amendment SA .* pursuant to the order of .*, having achieved the required 60 votes in the affirmative, is agreed to in Senate by Yea-Nay Vote/g
-/Amendment SA .* to the amendment of the House to the text of .* agreed to in Senate by Unanimous Consent/g
-/Amendment SA .* as modified agreed to in Senate by Voice/g
-/Amendment SA .* agreed to in Senate by Voice/g
-/Amendment SA .* as modified agreed to in Senate by Yea-Nay./g
-/Amendment SA .* agreed to in Senate by Unanimous Consent Vote/g
-/Amendment SP .* agreed to in Senate by Unanimous Consent/g
+/Amendment SA \d+ agreed to in Senate by Unanimous Consent/g
+/Amendment SA \d+ agreed to in Senate by Voice Vote/g
+/Amendment SA \d+ agreed to in Senate by Yea-Nay Vote./g
+/Amendment SA \d+ as modified agreed to in Senate by Voice Vote/g
+/Amendment SA \d+ as modified agreed to in Senate by Yea-Nay Vote/g
+/Amendment SA \d+ under the order of .*, having achieved 60 votes in the affirmative, was agreed to in Senate by Yea-Nay Vote./g
+/Amendment SA \d+, pursuant to the order of .*, having achieved the required 60 votes in the affirmative, was agreed to in Senate by Yea-Nay./g
+/Amendment SA \d+ pursuant to the order of .*, having achieved the required 60 votes in the affirmative, is agreed to in Senate by Yea-Nay Vote/g
+/Amendment SA \d+ to the amendment of the House to the text of .* agreed to in Senate by Unanimous Consent/g
+/Amendment SA \d+ as modified agreed to in Senate by Voice/g
+/Amendment SA \d+ agreed to in Senate by Voice/g
+/Amendment SA \d+ as modified agreed to in Senate by Yea-Nay./g
+/Amendment SA \d+ agreed to in Senate by Unanimous Consent Vote/g
+/Amendment SP \d+ agreed to in Senate by Unanimous Consent/g
 /Amendment agreed to in Senate by Voice Vote/g
-/Amendment SP .* agreed to in Senate by Voice Vote/g
-/Amendment SP .* as modified agreed to in Senate by Voice Vote/g
-/Amendment SP .* as modified agreed to in Senate by Yea-Nay Vote/g
-/Amendment SP .* agreed to in Senate by Voice/g
-/Amendment SP .* agreed to in Senate by Yea-Nay Vote/g
+/Amendment SP \d+ agreed to in Senate by Voice Vote/g
+/Amendment SP \d+ as modified agreed to in Senate by Voice Vote/g
+/Amendment SP \d+ as modified agreed to in Senate by Yea-Nay Vote/g
+/Amendment SP \d+ agreed to in Senate by Voice/g
+/Amendment SP \d+ agreed to in Senate by Yea-Nay Vote/g
 /Amendment as modified agreed to in Senate by Voice Vote/g
 /Amendment agreed to in Senate by Yea-Nay Vote/g
-/Amendment SP .* as amended agreed to in Senate by Voice Vote/g
+/Amendment SP \d+ as amended agreed to in Senate by Voice Vote/g

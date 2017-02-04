@@ -70,9 +70,9 @@ public class CongressImporter {
 
     private static void logCounter(String name, List<Pair<Integer, Integer>> bills) {
         logger.info("{}: {} bills", name, bills.size());
-        for(Pair<Integer, Integer> bill : bills) {
-            logger.info("{} ({})", bill.snd, bill.fst);
-        }
+//        for(Pair<Integer, Integer> bill : bills) {
+//            logger.info("{} ({})", bill.snd, bill.fst);
+//        }
     }
 
     private static void processCongresses() {
@@ -194,6 +194,7 @@ public class CongressImporter {
                 AMENDED_COUNTER.add(new Pair<>(congressNum, billNum));
                 String amdtNum = AmendmentIndexDocument.getAmdtNum(action);
                 Integer amdtSponsorId = dao.getAmdtSponsor(congressNum, amdtNum);
+                dao.setAmdtSuccessful(congressNum, amdtNum);
                 amdtSponsorIds.add(amdtSponsorId);
             }
         }

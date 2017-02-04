@@ -197,6 +197,24 @@ public class SenateDAO {
         return amdtSponsorId;
     }
 
+    private PreparedStatement createAmdtSuccessfulUpdate(Connection conn, int congressId, String amdtNum) throws SQLException {
+        String sql = "UPDATE amendment_sponsors SET successful = 1 WHERE congress_id=? AND amendment_num=?";
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ps.setInt(1, congressId);
+        ps.setString(2, amdtNum);
+
+        return ps;
+    }
+
+    public void setAmdtSuccessful(int congressId, String amdtNum) {
+        try(Connection conn = getConnection();
+            PreparedStatement update = createAmdtSuccessfulUpdate(conn, congressId, amdtNum)) {
+            update.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public Integer createAmdtSponsor(int congressId, String amdtNum, int sponsorId, int billNum) {
         Integer amdtSponsorId = null;
 
