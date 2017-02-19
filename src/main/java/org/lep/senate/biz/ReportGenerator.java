@@ -63,6 +63,7 @@ public class ReportGenerator {
         if(congressId > 96) {
             generateUnamendedReport(congressId);
             generateAmendedReport(congressId);
+            generateAltAmendedReport(congressId);
         }
     }
 
@@ -218,6 +219,108 @@ public class ReportGenerator {
         }
 
         writeReport(report, "Report_" + congressId + "_amended.tsv");
+    }
+
+    private static PreparedStatement createAltAmendersSelect(Connection conn, int congressId, int billNum) throws SQLException {
+        String sql = "SELECT sponsor_id FROM amendment_sponsors WHERE congress_id=? AND bill_num=? AND successful=1";
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ps.setInt(1, congressId);
+        ps.setInt(2, billNum);
+        return ps;
+    }
+
+    private static void generateAltAmendedReport(int congressId) {
+        Map<Integer, ReportRow> report = new HashMap<>();
+
+        try(Connection conn = dao.getConnection();
+            PreparedStatement select = createAmendedReportSelect(conn, congressId)) {
+            try(ResultSet rs = select.executeQuery()) {
+                while(rs.next()) {
+                    int sponsorId = rs.getInt(1);
+                    ReportRow row = report.get(sponsorId);
+                    if(row == null) {
+                        row = new ReportRow();
+                        report.put(sponsorId, row);
+                    }
+
+                    int importance = rs.getInt(2);
+                    int billNum = rs.getInt(8);
+                    Map<Integer, Double> amenderScores = new HashMap<>();
+                    int successfulAmendments = 0;
+
+                    try(PreparedStatement selectAmenders = createAltAmendersSelect(conn, congressId, billNum)) {
+                        try(ResultSet amendersRs = selectAmenders.executeQuery()) {
+                            while(amendersRs.next()) {
+                                successfulAmendments++;
+                                int amenderId = amendersRs.getInt(1);
+
+                                ReportRow amenderRow = report.get(amenderId);
+                                if(amenderRow == null) {
+                                    amenderRow = new ReportRow();
+                                    report.put(amenderId, amenderRow);
+                                }
+
+                                if(amenderScores.containsKey(amenderId)) {
+                                    amenderScores.put(amenderId, amenderScores.get(amenderId) + 1);
+                                } else {
+                                    amenderScores.put(amenderId, 1.0);
+                                }
+                            }
+
+                            for(Entry<Integer, Double> amenderScore : amenderScores.entrySet()) {
+                                amenderScores.put(amenderScore.getKey(), 0.5 * amenderScore.getValue() / successfulAmendments);
+                            }
+                        }
+                    }
+
+                    if(rs.getInt(3) == 1) {
+                        row.incrementScore(importance, Step.BILL, 0.5);
+                        for(Integer amenderId : amenderScores.keySet()) {
+                            ReportRow amenderRow = report.get(amenderId);
+                            Double amenderScore = amenderScores.get(amenderId);
+                            amenderRow.incrementScore(importance, Step.BILL, amenderScore);
+                        }
+                    }
+
+                    if(rs.getInt(4) == 1) {
+                        row.incrementScore(importance, Step.AIC, 0.5);
+                        for(Integer amenderId : amenderScores.keySet()) {
+                            ReportRow amenderRow = report.get(amenderId);
+                            Double amenderScore = amenderScores.get(amenderId);
+                            amenderRow.incrementScore(importance, Step.AIC, amenderScore);
+                        }
+                    }
+                    if(rs.getInt(5) == 1) {
+                        row.incrementScore(importance, Step.ABC, 0.5);
+                        for(Integer amenderId : amenderScores.keySet()) {
+                            ReportRow amenderRow = report.get(amenderId);
+                            Double amenderScore = amenderScores.get(amenderId);
+                            amenderRow.incrementScore(importance, Step.ABC, amenderScore);
+                        }
+                    }
+                    if(rs.getInt(6) == 1) {
+                        row.incrementScore(importance, Step.PASS, 0.5);
+                        for(Integer amenderId : amenderScores.keySet()) {
+                            ReportRow amenderRow = report.get(amenderId);
+                            Double amenderScore = amenderScores.get(amenderId);
+                            amenderRow.incrementScore(importance, Step.PASS, amenderScore);
+                        }
+                    }
+                    if(rs.getInt(7) == 1) {
+                        row.incrementScore(importance, Step.LAW, 0.5);
+                        for(Integer amenderId : amenderScores.keySet()) {
+                            ReportRow amenderRow = report.get(amenderId);
+                            Double amenderScore = amenderScores.get(amenderId);
+                            amenderRow.incrementScore(importance, Step.LAW, amenderScore);
+                        }
+                    }
+                }
+            }
+        } catch(SQLException e) {
+            e.printStackTrace();
+        }
+
+        writeReport(report, "Report_" + congressId + "_amended_alt.tsv");
     }
 
     private static void writeReport(Map<Integer, ReportRow> report, String fileName) {
