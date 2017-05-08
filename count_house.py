@@ -9,19 +9,17 @@ import LEP
 
 def count_all():
     try:
-        with open(LEP.congress_file, 'w') as f:
-            # TODO(mike.xu): make range configurable
+        with open(LEP.house_file, 'w') as f:
             for c in range(93, 115):
-                n = count_congress(c)
+                n = count_house(c)
                 line = '{},{}\n'.format(c, n)
                 f.write(line)
-    # TODO(mike.xu): more specific error handling
     except:
-        print('Error writing congress file: {}'.format(sys.exc_info()[0]))
+        print('Error writing house file: {}'.format(sys.exc_info()[0]))
 
-def count_congress(c):
+def count_house(c):
     q = {
-        'chamber': 'Senate',
+        'chamber': 'House',
         'congress': str(c),
         'source': 'legislation',
         'type': 'bills'
@@ -39,12 +37,12 @@ def count_congress(c):
             time.sleep(tries + 1)
         soup = LEP.get_soup(url)
         tries = tries + 1
-    
+
     ele = soup.select('.results-number')
     if len(ele) < 1:
         raise AppError('Could not find result count element')
     result_str = ''.join(ele[0].find_all(text=True, recursive=False)).strip()
-    return int(re.sub(r'[^0-9]*', '', result_str))    
+    return int(re.sub(r'[^0-9]*', '', result_str))
 
 if __name__ == '__main__':
     count_all()
